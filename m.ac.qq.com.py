@@ -228,8 +228,8 @@ def start_download_comic():
 
 def start_gen_pdf():
     input_dir = ""
-    while input_dir or os.path.isdir(input_dir):
-        input_dir = raw_input("请输入已下载漫画的路径(例：I:/comic/海贼王_航海王) \n >")
+    while not input_dir or not os.path.isdir(input_dir):
+        input_dir = raw_input(u'Please input the comic folder(example: I:/comic/海贼王_航海王) \n >')
     pics = []
     selected_chapter_list = []
     selected_chapter_string = "unknown"
