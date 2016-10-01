@@ -316,31 +316,32 @@ def start_gen_pdf(comic_path=None, chapter_selected_string=None):
     pdf_name = input_dir + os.path.sep + selected_chapter_string.replace(",", "_") + ".pdf"
     Logger.info("PDF name will be %s. for %s" % (pdf_name, selected_chapter_list))
 
-    added = False
-    bar = progressbar.ProgressBar(max_value=len(selected_chapter_list))
-    for idx, chapter in enumerate(selected_chapter_list):
-        chapter_path = input_dir + os.path.sep + str(chapter).zfill(3)
-        if os.path.isdir(chapter_path):
-            pics = glob.glob(chapter_path + os.path.sep + "*.jpg")
-            print "\n"
-            Logger.info("Chapter %s processing..." % chapter)
-            chapter_pdf_name = chapter_path + ".pdf"
-            if not os.path.isfile(chapter_pdf_name):
-                gen_pdf_by_pics(pics, chapter_pdf_name)
-            if added:
-                merge_pdf([pdf_name, chapter_pdf_name], pdf_name)
+    try:
+        bar = progressbar.ProgressBar(max_value=len(selected_chapter_list))
+        for idx, chapter in enumerate(selected_chapter_list):
+            chapter_path = input_dir + os.path.sep + str(chapter).zfill(3)
+            if os.path.isdir(chapter_path):
+                pics = glob.glob(chapter_path + os.path.sep + "*.jpg")
+                print "\n"
+                Logger.info("Chapter %s processing..." % chapter)
+                chapter_pdf_name = chapter_path + ".pdf"
+                if not os.path.isfile(chapter_pdf_name):
+                    gen_pdf_by_pics(pics, chapter_pdf_name)
+                if os.path.isfile(chapter_pdf_name):
+                    if chapter_pdf_name != pdf_name:
+                        if idx ==0:
+                            from shutil import copyfile
+                            copyfile(chapter_pdf_name, pdf_name)
+                        else:
+                            merge_pdf([pdf_name, chapter_pdf_name], pdf_name)
+                else:
+                    Logger.warning("Chapter not exists. %s" % chapter_pdf_name)
             else:
-                added = True
-                from shutil import copyfile
-                copyfile(chapter_pdf_name, pdf_name)
-        else:
-            Logger.warning("Directory not exists. %s" % chapter_path)
-        bar.update(idx + 1)
-
-    if added:
-        Logger.info("PDF save")
-    else:
-        Logger.warn("PDF not generated. %s" % pdf_name)
+                Logger.warning("Directory not exists. %s" % chapter_path)
+            bar.update(idx + 1)
+        Logger.info("PDF generated.")
+    except Exception,e:
+        Logger.warn("PDF not generated. %s" % e)
 
 
 def select_task(task_selected=None, comic_selected=None, chapters_selected=None, path_selected=None):
